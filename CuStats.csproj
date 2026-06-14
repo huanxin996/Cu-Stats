@@ -6,7 +6,7 @@
     <RootNamespace>CasualtiesUnknown.Stats</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <Description>Casualties Unknown 统计面板：仿 MC 全面统计，按存档隔离</Description>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
@@ -50,6 +50,10 @@
     </Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>references\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>references\UnityEngine.UI.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">

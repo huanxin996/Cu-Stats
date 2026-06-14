@@ -17,7 +17,7 @@ namespace CasualtiesUnknown.Stats
     {
         internal const string PluginGuid = "com.mod.casualties.stats";
         private const string PluginName = "CuStats";
-        private const string PluginVersion = "0.1.0";
+        private const string PluginVersion = "1.0.0";
         private const string SaveManagerGuid = "com.casualtiesUnknown.saveManager";
 
         internal static Plugin Instance { get; private set; }
@@ -37,9 +37,15 @@ namespace CasualtiesUnknown.Stats
                 _harmony.PatchAll(typeof(Plugin).Assembly);
                 StatsManager.Init();
                 _panel = new StatsPanel();
-                if (Chainloader.PluginInfos.ContainsKey(SaveManagerGuid))
+                bool standalone = !Chainloader.PluginInfos.ContainsKey(SaveManagerGuid);
+                if (!standalone)
                 {
-                    SaveManagerTabBridge.Register(_panel);
+                    if (!SaveManagerTabBridge.Register(_panel)) standalone = true;
+                }
+                if (standalone)
+                {
+                    MenuButtonInjector.Setup(() => _panel.Toggle());
+                    Log.LogInfo("[CuStats] 独立模式：已注入主菜单按钮");
                 }
                 gameObject.AddComponent<UpdateChecker>();
                 Log.LogInfo($"{PluginName} v{PluginVersion} 已加载");
@@ -54,13 +60,18 @@ namespace CasualtiesUnknown.Stats
         private void OnDestroy()
         {
             try { StatsManager.Flush(); } catch { }
+            try { MenuButtonInjector.Dispose(); } catch { }
             try { _harmony?.UnpatchSelf(); } catch { }
         }
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.U)) _panel?.Toggle();
-            if (_panel != null && _panel.Open && Input.GetKeyDown(KeyCode.Escape)) _panel.Close();
+            if (_panel != null && !_panel.ExpectsHotkeyCapture)
+            {
+                var hk = StatsConfig.ToggleHotkey != null ? StatsConfig.ToggleHotkey.Value : KeyCode.U;
+                if (Input.GetKeyDown(hk)) _panel.Toggle();
+                if (_panel.Open && Input.GetKeyDown(KeyCode.Escape)) _panel.Close();
+            }
             Triggers.MovementTracker.Tick();
             StatsManager.Tick(Time.unscaledDeltaTime);
         }

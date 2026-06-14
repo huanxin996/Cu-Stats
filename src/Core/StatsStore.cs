@@ -10,6 +10,10 @@ namespace CasualtiesUnknown.Stats.Core
     /// <summary>双层统计落盘：global.json 跨存档总计 + perSave/&lt;saveKey&gt;.json 当前世界明细，分区→键→计数。</summary>
     internal sealed class StatsStore
     {
+        private const long SchemaVersion = 3;
+        private const string MetaSection = "_meta";
+        private const string SchemaKey = "schema";
+
         private readonly string _globalPath;
         private readonly string _perSaveDir;
         private string _currentSaveKey;
@@ -26,6 +30,7 @@ namespace CasualtiesUnknown.Stats.Core
             Directory.CreateDirectory(root);
             Directory.CreateDirectory(_perSaveDir);
             _global = LoadFile(_globalPath);
+            if (Migrate(_global)) _globalDirty = true;
         }
 
         internal string CurrentSaveKey => _currentSaveKey;
@@ -36,7 +41,7 @@ namespace CasualtiesUnknown.Stats.Core
             Flush();
             _currentSaveKey = saveKey;
             _perSave = LoadFile(PerSavePath(saveKey));
-            _perSaveDirty = false;
+            _perSaveDirty = Migrate(_perSave);
         }
 
         /// <summary>同时累加到全局总计与当前世界，amount 可正可负。</summary>
@@ -104,6 +109,25 @@ namespace CasualtiesUnknown.Stats.Core
         }
 
         private static readonly Dictionary<string, long> EmptyBucket = new Dictionary<string, long>();
+
+        /// <summary>schema 升级时清空旧 used_* / used_*_count 与 general.items_used，避免新旧维度数据混存。</summary>
+        private static bool Migrate(Dictionary<string, Dictionary<string, long>> data)
+        {
+            long ver = 0;
+            if (data.TryGetValue(MetaSection, out var meta)) meta.TryGetValue(SchemaKey, out ver);
+            if (ver >= SchemaVersion) return false;
+            data.Remove(StatKeys.UsedFood);
+            data.Remove(StatKeys.UsedMedical);
+            data.Remove(StatKeys.UsedCombat);
+            data.Remove(StatKeys.UsedMisc);
+            data.Remove(StatKeys.UsedFoodCount);
+            data.Remove(StatKeys.UsedMedicalCount);
+            data.Remove(StatKeys.UsedCombatCount);
+            data.Remove(StatKeys.UsedMiscCount);
+            if (data.TryGetValue(StatKeys.General, out var general)) general.Remove(StatKeys.ItemsUsed);
+            data[MetaSection] = new Dictionary<string, long> { { SchemaKey, SchemaVersion } };
+            return true;
+        }
 
         private string PerSavePath(string saveKey) => Path.Combine(_perSaveDir, SafeFileName(saveKey) + ".json");
 

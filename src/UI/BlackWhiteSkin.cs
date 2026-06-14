@@ -150,10 +150,10 @@ namespace CasualtiesUnknown.Stats.UI
             ApplyMonochrome(_skin.scrollView, _bgPanel, Color.white);
 
             // 加大 slider 与 thumb 的尺寸，让圆点不被 20px 字号文字遮住
-            _skin.horizontalSlider.fixedHeight = 28f;
-            _skin.horizontalSlider.padding = new RectOffset(2, 2, 10, 10);
-            _skin.horizontalSliderThumb.fixedHeight = 44f;
-            _skin.horizontalSliderThumb.fixedWidth = 36f;
+            _skin.horizontalSlider.fixedHeight = 22f;
+            _skin.horizontalSlider.padding = new RectOffset(2, 2, 8, 8);
+            _skin.horizontalSliderThumb.fixedHeight = 28f;
+            _skin.horizontalSliderThumb.fixedWidth = 22f;
             _skin.verticalScrollbar.fixedWidth = 24f;
             _skin.verticalScrollbarThumb.fixedWidth = 24f;
 

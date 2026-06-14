@@ -10,6 +10,10 @@ namespace CasualtiesUnknown.Stats.Core
         internal const string UsedMedical = "used_medical";
         internal const string UsedCombat = "used_combat";
         internal const string UsedMisc = "used_misc";
+        internal const string UsedFoodCount = "used_food_count";
+        internal const string UsedMedicalCount = "used_medical_count";
+        internal const string UsedCombatCount = "used_combat_count";
+        internal const string UsedMiscCount = "used_misc_count";
 
         internal const string MovedCm = "moved_cm";
         internal const string DescendedLayers = "descended_layers";

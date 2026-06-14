@@ -59,15 +59,19 @@ namespace CasualtiesUnknown.Stats.Core
             _store?.Add(StatKeys.Picked, itemId, amount);
         }
 
-        /// <summary>记录使用物品：综合 +1，按分类（forceFood 强制 food，否则 ItemCategorizer.Categorize）分区按 itemId +1。</summary>
-        internal static void ReportItemUsed(Item item, bool forceFood = false)
+        /// <summary>记录使用物品：耐久分区按 amountX100 累加 + count 分区按 +1 累加；section 按 forceFood/forceCombat/Categorizer 决定。</summary>
+        internal static void ReportItemUsed(Item item, int amountX100, bool forceFood = false, bool forceCombat = false)
         {
-            if (item == null) return;
+            if (item == null || amountX100 <= 0) return;
             string id = item.id;
             if (string.IsNullOrEmpty(id)) return;
-            string section = forceFood ? StatKeys.UsedFood : ItemCategorizer.Categorize(item);
-            _store?.Add(StatKeys.General, StatKeys.ItemsUsed, 1);
-            _store?.Add(section, id, 1);
+            string section = forceFood ? StatKeys.UsedFood
+                : forceCombat ? StatKeys.UsedCombat
+                : ItemCategorizer.Categorize(item);
+            string countSection = section + "_count";
+            _store?.Add(StatKeys.General, StatKeys.ItemsUsed, amountX100);
+            _store?.Add(section, id, amountX100);
+            _store?.Add(countSection, id, 1);
         }
 
         /// <summary>累加移动距离（厘米），按需调用，避免每帧入盘。</summary>
