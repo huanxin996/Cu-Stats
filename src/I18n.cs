@@ -43,6 +43,7 @@ namespace CasualtiesUnknown.Stats
             ["settings.check_update"] = "启动时检查更新",
             ["settings.on"] = "开",
             ["settings.off"] = "关",
+            ["update.available"] = "CuStats 有新版本：{0}（点击打开 release 页）",
         };
 
         private static readonly Dictionary<string, string> _en = new Dictionary<string, string>
@@ -82,6 +83,7 @@ namespace CasualtiesUnknown.Stats
             ["settings.check_update"] = "Check for updates on startup",
             ["settings.on"] = "ON",
             ["settings.off"] = "OFF",
+            ["update.available"] = "CuStats update available: {0} (click to open release page)",
         };
 
         internal static string T(string key)

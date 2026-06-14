@@ -4,7 +4,7 @@ using CasualtiesUnknown.Stats.Util;
 
 namespace CasualtiesUnknown.Stats.Triggers
 {
-    /// <summary>BuildingEntity.health 跌破销毁阈值的那一帧上报建筑/植被破坏（发光草等不在 worldBlocks 里）。</summary>
+    /// <summary>BuildingEntity.health 跌破销毁阈值的那一帧上报建筑/植被破坏（发光草等不在 worldBlocks 里）；animal=true 且属玩家击杀时再综合页 +1。</summary>
     [HarmonyPatch(typeof(BuildingEntity), "Update")]
     internal static class BuildingDestroyedPatch
     {
@@ -15,7 +15,12 @@ namespace CasualtiesUnknown.Stats.Triggers
             string id = __instance.id;
             if (string.IsNullOrEmpty(id)) return;
             StatsManager.ReportBuildingDestroyed(id);
-            ModLog.Debug("[Building] destroyed id=" + id);
+            ModLog.Debug("[Building] destroyed id=" + id + " animal=" + __instance.animal);
+            if (__instance.animal && PlayerAttackTracker.IsPlayerKill(__instance.transform.position))
+            {
+                StatsManager.ReportKill();
+                ModLog.Debug("[Kill] player killed " + id);
+            }
         }
     }
 }
