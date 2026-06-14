@@ -1,0 +1,295 @@
+using UnityEngine;
+
+namespace CasualtiesUnknown.Stats.UI
+{
+    /// <summary>
+    /// 黑底白线条风格 GUISkin。在 OnGUI 顶层 push、绘制结束 pop 即可全局生效。
+    /// 不依赖 UnityEngine.TextRenderingModule（IMGUIModule 自带的 GUISkin / GUIStyle 已够用）。
+    /// </summary>
+    internal static class BlackWhiteSkin
+    {
+        private static GUISkin _skin;
+        private static Texture2D _bgPanel;
+        private static Texture2D _bgButton;
+        private static Texture2D _bgButtonHover;
+        private static Texture2D _bgCard;
+        private static Texture2D _bgTab;
+        private static Texture2D _bgTabActive;
+        private static Texture2D _line;
+
+        private static GUIStyle _hStyle;
+        private static GUIStyle _hButtonStyle;
+        private static GUIStyle _cardStyle;
+        private static GUIStyle _tabStyle;
+        private static GUIStyle _tabActiveStyle;
+        private static GUIStyle _lineStyle;
+        private static GUIStyle _iconBtnStyle;
+
+        internal static GUIStyle HeaderStyle => _hStyle;
+        internal static GUIStyle HeaderButtonStyle => _hButtonStyle;
+        internal static GUIStyle CardStyle => _cardStyle;
+        internal static GUIStyle TabStyle => _tabStyle;
+        internal static GUIStyle TabActiveStyle => _tabActiveStyle;
+        internal static GUIStyle LineStyle => _lineStyle;
+        internal static GUIStyle IconBtnStyle => _iconBtnStyle;
+        internal static Texture2D LineTex => _line;
+
+        private static GUISkin _previousSkin;
+
+        internal static void Push()
+        {
+            EnsureBuilt();
+            _previousSkin = GUI.skin;
+            GUI.skin = _skin;
+        }
+
+        internal static void Pop()
+        {
+            GUI.skin = _previousSkin;
+        }
+
+        /// <summary>画一条 1px 横线（用于卡片分隔等场合）。</summary>
+        internal static void DrawHLine(Rect rect)
+        {
+            EnsureBuilt();
+            GUI.DrawTexture(rect, _line, ScaleMode.StretchToFill);
+        }
+
+        /// <summary>给一个矩形画 1px 白色细边框。</summary>
+        internal static void DrawBorder(Rect rect)
+        {
+            EnsureBuilt();
+            // 上 / 下 / 左 / 右 各一条 1px
+            GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 1f), _line, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(rect.x, rect.yMax - 1f, rect.width, 1f), _line, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(rect.x, rect.y, 1f, rect.height), _line, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(rect.xMax - 1f, rect.y, 1f, rect.height), _line, ScaleMode.StretchToFill);
+        }
+
+        /// <summary>给矩形画指定厚度的白色边框。</summary>
+        internal static void DrawBorder(Rect rect, float thickness)
+        {
+            EnsureBuilt();
+            GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, thickness), _line, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), _line, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(rect.x, rect.y, thickness, rect.height), _line, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), _line, ScaleMode.StretchToFill);
+        }
+
+        /// <summary>用两条对角线在矩形里画一个白色 "X"。</summary>
+        internal static void DrawCloseX(Rect rect, float thickness = 2f)
+        {
+            EnsureBuilt();
+            DrawDiagonalLine(rect.x, rect.y, rect.xMax, rect.yMax, thickness);
+            DrawDiagonalLine(rect.x, rect.yMax, rect.xMax, rect.y, thickness);
+        }
+
+        /// <summary>在矩形里画一个简化的铅笔图标轮廓（一根斜线 + 两个端点的小线段）。</summary>
+        internal static void DrawPencil(Rect rect, float thickness = 2f)
+        {
+            EnsureBuilt();
+            // 主体斜线：左下 → 右上
+            float pad = thickness;
+            float x1 = rect.x + pad, y1 = rect.yMax - pad;
+            float x2 = rect.xMax - pad, y2 = rect.y + pad;
+            DrawDiagonalLine(x1, y1, x2, y2, thickness);
+            // 笔尖：左下角的两条短线，与主体斜线相邻
+            DrawDiagonalLine(x1, y1, x1 + rect.width * 0.18f, y1 - rect.height * 0.05f, thickness);
+            DrawDiagonalLine(x1, y1, x1 + rect.width * 0.05f, y1 - rect.height * 0.18f, thickness);
+            // 笔尾：右上角短横，与主体斜线相邻
+            DrawDiagonalLine(x2, y2, x2 - rect.width * 0.18f, y2 + rect.height * 0.05f, thickness);
+            DrawDiagonalLine(x2, y2, x2 - rect.width * 0.05f, y2 + rect.height * 0.18f, thickness);
+        }
+
+        private static void DrawDiagonalLine(float x1, float y1, float x2, float y2, float thickness)
+        {
+            EnsureBuilt();
+            float dx = x2 - x1;
+            float dy = y2 - y1;
+            float length = Mathf.Sqrt(dx * dx + dy * dy);
+            // 沿对角线铺轴对齐小方块，避免 RotateAroundPivot 与外层 Scale 矩阵复合时的纹理走样
+            int steps = Mathf.Max(2, Mathf.CeilToInt(length / Mathf.Max(0.5f, thickness * 0.5f)));
+            for (int i = 0; i <= steps; i++)
+            {
+                float t = i / (float)steps;
+                float x = x1 + dx * t;
+                float y = y1 + dy * t;
+                GUI.DrawTexture(new Rect(x - thickness * 0.5f, y - thickness * 0.5f, thickness, thickness),
+                    _line, ScaleMode.StretchToFill);
+            }
+        }
+
+        private static void EnsureBuilt()
+        {
+            if (_skin != null) return;
+
+            _bgPanel = MakeColorTex(0, 0, 0, 125);
+            _bgButton = MakeBorderedTex(0, 0, 0, 150, 255, 255, 255, 255, 2);
+            _bgButtonHover = MakeBorderedTex(60, 60, 60, 190, 255, 255, 255, 255, 2);
+            _bgCard = MakeColorTex(15, 15, 15, 105);
+            _bgTab = MakeBorderedTex(0, 0, 0, 150, 255, 255, 255, 255, 2);
+            _bgTabActive = MakeBorderedTex(255, 255, 255, 235, 255, 255, 255, 255, 2);
+            _line = MakeColorTex(255, 255, 255, 255);
+
+            _skin = ScriptableObject.CreateInstance<GUISkin>();
+            // 用默认 skin 的字段初始化每个 GUIStyle
+            CopyDefaultsInto(_skin);
+
+            ApplyMonochrome(_skin.box, _bgPanel, Color.white);
+            ApplyMonochrome(_skin.window, _bgPanel, Color.white);
+            ApplyMonochrome(_skin.button, _bgButton, Color.white, _bgButtonHover);
+            ApplyMonochrome(_skin.label, null, Color.white);
+            ApplyMonochrome(_skin.textField, _bgCard, Color.white);
+            ApplyMonochrome(_skin.textArea, _bgCard, Color.white);
+            ApplyMonochrome(_skin.toggle, null, Color.white);
+            ApplyMonochrome(_skin.horizontalSlider, _bgCard, Color.white);
+            ApplyMonochrome(_skin.horizontalSliderThumb, _line, Color.black);
+            ApplyMonochrome(_skin.verticalScrollbar, _bgCard, Color.white);
+            ApplyMonochrome(_skin.verticalScrollbarThumb, _line, Color.black);
+            // ScrollView 自身的背景（之前漏改导致顶部出现白色横条）
+            ApplyMonochrome(_skin.scrollView, _bgPanel, Color.white);
+
+            // 加大 slider 与 thumb 的尺寸，让圆点不被 20px 字号文字遮住
+            _skin.horizontalSlider.fixedHeight = 28f;
+            _skin.horizontalSlider.padding = new RectOffset(2, 2, 10, 10);
+            _skin.horizontalSliderThumb.fixedHeight = 44f;
+            _skin.horizontalSliderThumb.fixedWidth = 36f;
+            _skin.verticalScrollbar.fixedWidth = 24f;
+            _skin.verticalScrollbarThumb.fixedWidth = 24f;
+
+            _skin.button.alignment = TextAnchor.MiddleCenter;
+            _skin.button.fontSize = 20;
+            _skin.button.fontStyle = FontStyle.Bold;
+            _skin.button.padding = new RectOffset(14, 14, 10, 10);
+            _skin.button.border = new RectOffset(2, 2, 2, 2);
+            _skin.label.fontSize = 20;
+            _skin.label.fontStyle = FontStyle.Bold;
+            _skin.textField.fontSize = 20;
+            _skin.textField.fontStyle = FontStyle.Bold;
+            _skin.textField.padding = new RectOffset(12, 12, 8, 8);
+            _skin.toggle.fontSize = 20;
+            _skin.toggle.fontStyle = FontStyle.Bold;
+            _skin.box.fontSize = 20;
+            _skin.box.fontStyle = FontStyle.Bold;
+
+            _hStyle = new GUIStyle(_skin.label)
+            {
+                fontSize = 32,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleLeft,
+            };
+
+            _hButtonStyle = new GUIStyle(_skin.button)
+            {
+                fontSize = 28,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(20, 20, 12, 12),
+            };
+            ApplyMonochrome(_hButtonStyle, _bgButton, Color.white, _bgButtonHover);
+
+            _cardStyle = new GUIStyle(_skin.box) { padding = new RectOffset(20, 20, 18, 18) };
+            ApplyMonochrome(_cardStyle, _bgCard, Color.white);
+
+            _tabStyle = new GUIStyle(_skin.button)
+            {
+                fontSize = 26,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+            };
+            ApplyMonochrome(_tabStyle, _bgTab, Color.white);
+
+            _tabActiveStyle = new GUIStyle(_tabStyle);
+            ApplyMonochrome(_tabActiveStyle, _bgTabActive, Color.black);
+
+            _iconBtnStyle = new GUIStyle(_skin.button)
+            {
+                padding = new RectOffset(2, 2, 2, 2),
+                margin = new RectOffset(2, 2, 0, 0),
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 22,
+                fontStyle = FontStyle.Bold,
+            };
+            ApplyMonochrome(_iconBtnStyle, _bgButton, Color.white, _bgButtonHover);
+
+            _lineStyle = new GUIStyle(_skin.label) { fixedHeight = 1f };
+        }
+
+        private static void CopyDefaultsInto(GUISkin dst)
+        {
+            var defaults = GUI.skin;
+            dst.font = defaults.font;
+            dst.box = new GUIStyle(defaults.box);
+            dst.window = new GUIStyle(defaults.window);
+            dst.button = new GUIStyle(defaults.button);
+            dst.label = new GUIStyle(defaults.label);
+            dst.textField = new GUIStyle(defaults.textField);
+            dst.textArea = new GUIStyle(defaults.textArea);
+            dst.toggle = new GUIStyle(defaults.toggle);
+            dst.horizontalSlider = new GUIStyle(defaults.horizontalSlider);
+            dst.horizontalSliderThumb = new GUIStyle(defaults.horizontalSliderThumb);
+            dst.verticalScrollbar = new GUIStyle(defaults.verticalScrollbar);
+            dst.verticalScrollbarThumb = new GUIStyle(defaults.verticalScrollbarThumb);
+            dst.scrollView = new GUIStyle(defaults.scrollView);
+        }
+
+        private static void ApplyMonochrome(GUIStyle s, Texture2D bg, Color text, Texture2D hoverBg = null)
+        {
+            if (bg != null)
+            {
+                s.normal.background = bg;
+                s.onNormal.background = bg;
+                s.active.background = hoverBg ?? bg;
+                s.onActive.background = hoverBg ?? bg;
+                s.focused.background = bg;
+                s.onFocused.background = bg;
+                s.hover.background = hoverBg ?? bg;
+                s.onHover.background = hoverBg ?? bg;
+            }
+            s.normal.textColor = text;
+            s.onNormal.textColor = text;
+            s.active.textColor = text;
+            s.onActive.textColor = text;
+            s.focused.textColor = text;
+            s.onFocused.textColor = text;
+            s.hover.textColor = text;
+            s.onHover.textColor = text;
+        }
+
+        private static Texture2D MakeColorTex(byte r, byte g, byte b, byte a)
+        {
+            var t = new Texture2D(2, 2, TextureFormat.RGBA32, false) { hideFlags = HideFlags.HideAndDontSave };
+            var c = new Color32(r, g, b, a);
+            var pixels = new Color32[4] { c, c, c, c };
+            t.SetPixels32(pixels);
+            t.Apply();
+            return t;
+        }
+
+        /// <summary>生成带白边的九宫格纹理：外圈 borderPx 像素为边色，内部为填充色。配 GUIStyle.border 用。</summary>
+        private static Texture2D MakeBorderedTex(byte fr, byte fg, byte fb, byte fa,
+            byte br, byte bg, byte bb, byte ba, int borderPx)
+        {
+            int size = borderPx * 2 + 2;
+            var t = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+                filterMode = FilterMode.Point,
+            };
+            var fill = new Color32(fr, fg, fb, fa);
+            var edge = new Color32(br, bg, bb, ba);
+            var pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    bool isEdge = x < borderPx || x >= size - borderPx || y < borderPx || y >= size - borderPx;
+                    pixels[y * size + x] = isEdge ? edge : fill;
+                }
+            }
+            t.SetPixels32(pixels);
+            t.Apply();
+            return t;
+        }
+    }
+}
