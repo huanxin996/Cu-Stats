@@ -15,7 +15,8 @@ namespace CasualtiesUnknown.Stats.Core
 
         private static Type _krokNetType;
         private static PropertyInfo _isClientProp;
-        private static FieldInfo _persistentIdField;
+        private static FieldInfo _localPlayerField;
+        private static MethodInfo _getPersistentIdMethod;
         private static bool _krokProbed;
 
         /// <summary>当前存档命名空间，解不出时回落 "unknown"。</summary>
@@ -117,17 +118,21 @@ namespace CasualtiesUnknown.Stats.Core
                 {
                     _krokNetType = AccessTools.TypeByName("KrokoshaCasualtiesMP.Net");
                     if (_krokNetType != null)
-                    {
                         _isClientProp = AccessTools.Property(_krokNetType, "is_client");
-                        _persistentIdField = AccessTools.Field(_krokNetType, "client_persistent_id");
+                    var tNetPlayer = AccessTools.TypeByName("KrokoshaCasualtiesMP.NetPlayer");
+                    if (tNetPlayer != null)
+                    {
+                        _localPlayerField = AccessTools.Field(tNetPlayer, "LOCAL_PLAYER");
+                        _getPersistentIdMethod = AccessTools.Method(tNetPlayer, "GetPersistentId");
                     }
                     _krokProbed = true;
                 }
-                if (_krokNetType == null || _isClientProp == null) return null;
+                if (_isClientProp == null || _localPlayerField == null || _getPersistentIdMethod == null) return null;
                 bool isClient = (bool)_isClientProp.GetValue(null);
                 if (!isClient) return null;
-                var pid = _persistentIdField?.GetValue(null) as string;
-                return pid;
+                var localPlayer = _localPlayerField.GetValue(null);
+                if (localPlayer == null) return null;
+                return _getPersistentIdMethod.Invoke(localPlayer, null) as string;
             }
             catch { return null; }
         }

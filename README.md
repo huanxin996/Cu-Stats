@@ -1,4 +1,4 @@
-# CuStats V1.0.0 for Casualties: Unknown
+# CuStats V1.0.1 for Casualties: Unknown
 
 > 适配游戏《未知伤亡》的统计面板模组，仿 Minecraft 风
 > 兼容：CuSaveManager（在场时设置合并到其面板，缺少不影响功能）

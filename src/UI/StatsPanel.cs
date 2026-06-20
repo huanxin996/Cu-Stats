@@ -191,7 +191,7 @@ namespace CasualtiesUnknown.Stats.UI
             GUILayout.EndScrollView();
         }
 
-        private const string AboutVersion = "1.0.0";
+        private const string AboutVersion = "1.0.1";
 
         private static GUIStyle _centerTitle;
         private static GUIStyle CenterTitleStyle

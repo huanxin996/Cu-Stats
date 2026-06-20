@@ -17,7 +17,7 @@ namespace CasualtiesUnknown.Stats
     {
         internal const string PluginGuid = "com.mod.casualties.stats";
         private const string PluginName = "CuStats";
-        private const string PluginVersion = "1.0.0";
+        private const string PluginVersion = "1.0.1";
         private const string SaveManagerGuid = "com.casualtiesUnknown.saveManager";
 
         internal static Plugin Instance { get; private set; }

@@ -2,6 +2,10 @@
 
 > 中文更新日志：见 [changes.md](changes.md)
 
+## v1.0.1
+
+- "KrokMP compatibility" Compatible with KrokMP3 and KrokMP4.
+
 ## v1.0.0
 
 Initial release.

@@ -1,4 +1,4 @@
-# CuStats V1.0.0 for Casualties: Unknown
+# CuStats V1.0.1 for Casualties: Unknown
 
 > A Minecraft-style statistics panel mod for Casualties: Unknown
 > Compatible with: CuSaveManager (settings merge into its panel when present; its absence does not break features)

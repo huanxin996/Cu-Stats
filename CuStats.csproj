@@ -6,7 +6,7 @@
     <RootNamespace>CasualtiesUnknown.Stats</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Description>Casualties Unknown 统计面板：仿 MC 全面统计，按存档隔离</Description>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>

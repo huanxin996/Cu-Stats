@@ -2,6 +2,10 @@
 
 > English changelog: see [changes.en.md](changes.en.md)
 
+## v1.0.1
+
+- ""兼容KrokMP"" 兼容KrokMP3与KrokMP4
+
 ## v1.0.0
 
 首发版本。
